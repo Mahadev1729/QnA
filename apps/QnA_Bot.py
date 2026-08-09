@@ -25,8 +25,19 @@ if ENV_FILE.exists():
         override=True
     )
 
-GROQ_API_KEY = os.getenv("GROQ_API_KEY")
-SERPER_API_KEY = os.getenv("SERPER_API_KEY")
+def get_secret(key_name):
+    val = os.getenv(key_name)
+    if val:
+        return val
+    try:
+        if key_name in st.secrets:
+            return st.secrets[key_name]
+    except Exception:
+        pass
+    return None
+
+GROQ_API_KEY = get_secret("GROQ_API_KEY")
+SERPER_API_KEY = get_secret("SERPER_API_KEY")
 
 if not GROQ_API_KEY:
     st.error(
