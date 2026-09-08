@@ -242,8 +242,8 @@ body,
     min-height: 2.35rem;
     border-radius: .7rem;
     background: var(--accent) !important;
-    color: white !important;
-    -webkit-text-fill-color: white !important;
+    color: #172426 !important;
+    -webkit-text-fill-color: #172426 !important;
 }
 
 [data-testid="stChatInput"] button svg {
@@ -252,7 +252,7 @@ body,
 
 [data-testid="stChatInput"] button::after {
     content: "Enter";
-    color: white;
+    color: #172426 !important;
     font-size: .78rem;
     font-weight: 700;
 }
