@@ -1,0 +1,267 @@
+﻿@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap');
+
+:root {
+    --ink: #172426;
+    --muted: #718080;
+    --paper: #f6f8f6;
+    --panel: #ffffff;
+    --line: #e2e9e5;
+    --accent: #ef765d;
+    --accent-dark: #ce5d48;
+    --mint: #dcefe7;
+}
+
+html,
+body,
+[class*="css"] {
+    font-family: 'DM Sans', sans-serif;
+    color: var(--ink);
+}
+
+[data-testid="stAppViewContainer"] {
+    background:
+        radial-gradient(circle at 78% 3%, rgba(220, 239, 231, .9), transparent 28rem),
+        var(--paper);
+}
+
+[data-testid="stHeader"] {
+    background: transparent;
+}
+
+[data-testid="stSidebar"] {
+    background: #172426;
+    border-right: 1px solid #263638;
+}
+
+[data-testid="stSidebar"]>div:first-child {
+    padding: 1.4rem 1rem;
+}
+
+[data-testid="stSidebar"] [data-testid="stMarkdownContainer"] {
+    color: #dce8e3;
+}
+
+.brand {
+    display: flex;
+    align-items: center;
+    gap: .7rem;
+    margin: .25rem .35rem 2rem;
+}
+
+.brand-mark {
+    display: grid;
+    place-items: center;
+    width: 2.2rem;
+    height: 2.2rem;
+    border-radius: .75rem;
+    background: var(--accent);
+    color: white;
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 700;
+    box-shadow: 0 8px 20px rgba(239, 118, 93, .25);
+}
+
+.brand-name {
+    color: #f8fbf9;
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 1.12rem;
+    font-weight: 700;
+    letter-spacing: .01em;
+}
+
+.sidebar-label {
+    margin: 1.7rem .35rem .6rem;
+    color: #81928e;
+    font-size: .68rem;
+    font-weight: 700;
+    letter-spacing: .13em;
+    text-transform: uppercase;
+}
+
+[data-testid="stSidebar"] .stButton>button {
+    width: 100%;
+    min-height: 2.7rem;
+    border: 1px solid #38504d;
+    border-radius: .7rem;
+    background: #243533;
+    color: #f4faf7;
+    font-weight: 600;
+    transition: border-color .2s ease, background .2s ease, transform .2s ease;
+}
+
+[data-testid="stSidebar"] .stButton>button:hover {
+    border-color: var(--accent);
+    background: #2d433f;
+    transform: translateY(-1px);
+}
+
+.sidebar-note {
+    margin: .9rem .35rem 0;
+    color: #9baba7;
+    font-size: .8rem;
+    line-height: 1.55;
+}
+
+.sidebar-note strong {
+    color: #dce8e3;
+    font-weight: 600;
+}
+
+.main .block-container {
+    max-width: 980px;
+    padding: 2.8rem 2rem 7rem;
+}
+
+.topline {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 2.3rem;
+    color: var(--muted);
+    font-size: .75rem;
+    font-weight: 700;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+}
+
+.status-dot {
+    display: inline-block;
+    width: .45rem;
+    height: .45rem;
+    margin-right: .35rem;
+    border-radius: 50%;
+    background: #61b88f;
+    box-shadow: 0 0 0 4px rgba(97, 184, 143, .13);
+}
+
+.welcome {
+    padding: 1.5rem 0 1.2rem;
+}
+
+.welcome-kicker {
+    color: var(--accent-dark);
+    font-size: .75rem;
+    font-weight: 700;
+    letter-spacing: .15em;
+    text-transform: uppercase;
+}
+
+.welcome h1 {
+    max-width: 620px;
+    margin: .45rem 0 .8rem;
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: clamp(2.25rem, 5vw, 4.5rem);
+    line-height: .98;
+    letter-spacing: -.045em;
+    color: var(--ink);
+}
+
+.welcome p {
+    max-width: 540px;
+    margin: 0;
+    color: var(--muted);
+    font-size: 1rem;
+    line-height: 1.65;
+}
+
+.prompt-hint {
+    display: inline-flex;
+    align-items: center;
+    gap: .5rem;
+    margin-top: 1.6rem;
+    padding: .55rem .75rem;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    background: rgba(255, 255, 255, .65);
+    color: var(--muted);
+    font-size: .78rem;
+}
+
+[data-testid="stChatMessage"] {
+    border: 0;
+    padding: 1.2rem 1.1rem;
+    border-radius: 1rem;
+    animation: rise-in .35s ease both;
+}
+
+[data-testid="stChatMessage"]:has([data-testid="chatAvatarIcon-user"]) {
+    margin: .8rem 0;
+    background: var(--panel);
+    border: 1px solid var(--line);
+    box-shadow: 0 8px 24px rgba(23, 36, 38, .035);
+}
+
+[data-testid="stChatMessage"]:has([data-testid="chatAvatarIcon-assistant"]) {
+    margin: .8rem 0;
+    background: transparent;
+}
+
+[data-testid="stChatMessage"] p {
+    line-height: 1.7;
+}
+
+[data-testid="stChatMessage"] [data-testid="chatAvatarIcon-user"] {
+    background: var(--mint);
+    color: var(--ink);
+}
+
+[data-testid="stChatMessage"] [data-testid="chatAvatarIcon-assistant"] {
+    background: var(--accent);
+    color: white;
+}
+
+[data-testid="stChatInput"] {
+    bottom: 1.5rem;
+}
+
+[data-testid="stChatInput"]>div {
+    border: 1px solid #ccd9d3;
+    border-radius: 1rem;
+    background: rgba(255, 255, 255, .95);
+    box-shadow: 0 16px 40px rgba(23, 36, 38, .12);
+}
+
+[data-testid="stChatInput"] textarea {
+    color: var(--ink);
+    font-family: 'DM Sans', sans-serif;
+}
+
+[data-testid="stChatInput"] button {
+    border-radius: .7rem;
+    background: var(--accent);
+    color: white;
+}
+
+[data-testid="stChatInput"] button:hover {
+    background: var(--accent-dark);
+}
+
+@keyframes rise-in {
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@media (max-width: 700px) {
+    .main .block-container {
+        padding: 1.7rem 1rem 6rem;
+    }
+
+    .topline {
+        margin-bottom: 1.5rem;
+    }
+
+    .welcome h1 {
+        font-size: 2.65rem;
+    }
+
+    [data-testid="stChatMessage"] {
+        padding: .95rem .75rem;
+    }
+}

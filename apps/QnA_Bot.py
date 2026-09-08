@@ -15,7 +15,14 @@ from langgraph.checkpoint.memory import MemorySaver
 st.set_page_config(
     page_title="QuickAnswer",
     page_icon="🤖",
-    layout="centered"
+    layout="wide",
+    initial_sidebar_state="expanded"
+)
+
+STYLE_FILE = Path(__file__).with_name("style.css")
+st.markdown(
+    f"<style>{STYLE_FILE.read_text(encoding='utf-8')}</style>",
+    unsafe_allow_html=True,
 )
 
 BASE_DIR = Path(__file__).resolve().parents[1]
@@ -148,28 +155,78 @@ agent = create_agent(
     )
 )
 
-st.title("🤖 QuickAnswer")
-st.subheader("Answers at the speed of thought")
-st.caption("Powered by Groq + LangGraph + Google Search")
+with st.sidebar:
+    st.markdown(
+        """
+        <div class="brand">
+            <div class="brand-mark">Q</div>
+            <div class="brand-name">QuickAnswer</div>
+        </div>
+        <div class="sidebar-label">Workspace</div>
+        """,
+        unsafe_allow_html=True,
+    )
 
-if st.button("🗑️ Clear Chat"):
+    clear_chat = st.button("＋  New conversation", use_container_width=True)
+
+    st.markdown(
+        """
+        <div class="sidebar-label">About</div>
+        <div class="sidebar-note">
+            <strong>Focused answers, less noise.</strong><br>
+            Groq reasoning with web search when freshness matters.
+        </div>
+        <div class="sidebar-note">
+            Your conversation is saved locally for this chat link.
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+if clear_chat:
     st.session_state.history = []
     st.session_state.memory = MemorySaver()
     clear_chat_history(CHAT_ID)
     st.rerun()
 
+st.markdown(
+    """
+    <div class="topline">
+        <span>QuickAnswer / New thread</span>
+        <span><span class="status-dot"></span>Ready when you are</span>
+    </div>
+    """,
+    unsafe_allow_html=True,
+)
+
+if not st.session_state.history:
+    st.markdown(
+        """
+        <section class="welcome">
+            <div class="welcome-kicker">Your thinking companion</div>
+            <h1>Ask clearly.<br>Move faster.</h1>
+            <p>
+                Turn a rough question into a useful next step. Ask for an explanation,
+                a plan, or a current answer from the web.
+            </p>
+            <div class="prompt-hint">✦ Try: “Help me understand this simply”</div>
+        </section>
+        """,
+        unsafe_allow_html=True,
+    )
+
 for message in st.session_state.history:
     role = message["role"]
     content = message["content"]
 
-    with st.chat_message(role):
+    with st.chat_message(role, avatar="◎" if role == "assistant" else "👤"):
         st.markdown(content)
 
 query = st.chat_input("Ask anything...")
 
 if query:
 
-    with st.chat_message("user"):
+    with st.chat_message("user", avatar="👤"):
         st.markdown(query)
 
     st.session_state.history.append(
@@ -198,7 +255,7 @@ if query:
             stream_mode="messages"
         )
 
-        with st.chat_message("assistant"):
+        with st.chat_message("assistant", avatar="◎"):
             message_placeholder = st.empty()
             full_response = ""
 
