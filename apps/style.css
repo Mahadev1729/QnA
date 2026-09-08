@@ -222,8 +222,9 @@ body,
 }
 
 [data-testid="stChatInput"] textarea {
-    color: var(--ink) !important;
-    -webkit-text-fill-color: var(--ink) !important;
+    color: #000000 !important;
+    -webkit-text-fill-color: #000000 !important;
+    font-weight: 500;
     font-family: 'DM Sans', sans-serif;
 }
 
@@ -234,10 +235,26 @@ body,
 }
 
 [data-testid="stChatInput"] button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 4.5rem;
+    min-height: 2.35rem;
     border-radius: .7rem;
     background: var(--accent) !important;
     color: white !important;
     -webkit-text-fill-color: white !important;
+}
+
+[data-testid="stChatInput"] button svg {
+    display: none;
+}
+
+[data-testid="stChatInput"] button::after {
+    content: "Enter";
+    color: white;
+    font-size: .78rem;
+    font-weight: 700;
 }
 
 [data-testid="stChatInput"] button:hover {
