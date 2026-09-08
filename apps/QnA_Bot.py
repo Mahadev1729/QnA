@@ -219,14 +219,14 @@ for message in st.session_state.history:
     role = message["role"]
     content = message["content"]
 
-    with st.chat_message(role, avatar="◎" if role == "assistant" else "👤"):
+    with st.chat_message(role):
         st.markdown(content)
 
 query = st.chat_input("Ask anything...")
 
 if query:
 
-    with st.chat_message("user", avatar="👤"):
+    with st.chat_message("user"):
         st.markdown(query)
 
     st.session_state.history.append(
@@ -255,7 +255,7 @@ if query:
             stream_mode="messages"
         )
 
-        with st.chat_message("assistant", avatar="◎"):
+        with st.chat_message("assistant"):
             message_placeholder = st.empty()
             full_response = ""
 
