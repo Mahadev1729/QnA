@@ -209,7 +209,6 @@ if not st.session_state.history:
                 Turn a rough question into a useful next step. Ask for an explanation,
                 a plan, or a current answer from the web.
             </p>
-            <div class="prompt-hint">✦ Try: “Help me understand this simply”</div>
         </section>
         """,
         unsafe_allow_html=True,
