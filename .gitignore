@@ -1,3 +1,4 @@
 /qnaenv
+.venv
 .env
 chat_history.db
