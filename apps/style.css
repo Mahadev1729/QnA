@@ -222,14 +222,22 @@ body,
 }
 
 [data-testid="stChatInput"] textarea {
-    color: var(--ink);
+    color: var(--ink) !important;
+    -webkit-text-fill-color: var(--ink) !important;
     font-family: 'DM Sans', sans-serif;
+}
+
+[data-testid="stChatInput"] textarea::placeholder {
+    color: #718080 !important;
+    opacity: 1 !important;
+    -webkit-text-fill-color: #718080 !important;
 }
 
 [data-testid="stChatInput"] button {
     border-radius: .7rem;
-    background: var(--accent);
-    color: white;
+    background: var(--accent) !important;
+    color: white !important;
+    -webkit-text-fill-color: white !important;
 }
 
 [data-testid="stChatInput"] button:hover {
