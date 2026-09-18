@@ -195,6 +195,22 @@ export default function App() {
     };
     setMessages((prev) => [...prev, userMsg]);
 
+    // Proactively update the sidebar conversation title from "New Conversation" immediately
+    setConversations((prev) =>
+      prev.map((c) =>
+        c.id === currentChatId &&
+        (!c.title || c.title === 'New Conversation' || c.title === 'New chat')
+          ? {
+              ...c,
+              title:
+                text.length > 32
+                  ? text.substring(0, 30).trim() + '...'
+                  : text.trim(),
+            }
+          : c
+      )
+    );
+
     const assistantMsgId = Date.now() + 1;
     const assistantPlaceholder = {
       id: assistantMsgId,

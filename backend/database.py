@@ -228,6 +228,49 @@ def get_messages(chat_id: str) -> List[Dict[str, Any]]:
         return result
 
 
+def generate_smart_title(content: str) -> str:
+    """Generates a clean, concise 3-6 word title from the user's first prompt."""
+    text = content.strip().replace("\n", " ")
+    if not text:
+        return "New Conversation"
+
+    # Remove conversational filler words from start if any
+    lower_text = text.lower()
+    fillers = [
+        "please explain ",
+        "please write ",
+        "please tell me ",
+        "can you explain ",
+        "can you write ",
+        "can you tell me ",
+        "how do i ",
+        "how to ",
+        "what is the ",
+        "what is ",
+        "what are ",
+        "tell me about ",
+    ]
+    for filler in fillers:
+        if lower_text.startswith(filler):
+            text = text[len(filler):].strip()
+            break
+
+    # Capitalize first letter
+    if text:
+        text = text[0].upper() + text[1:]
+
+    # Truncate cleanly at word boundary
+    if len(text) > 36:
+        truncated = text[:36]
+        last_space = truncated.rfind(" ")
+        if last_space > 15:
+            text = truncated[:last_space] + "..."
+        else:
+            text = truncated + "..."
+
+    return text or "New Conversation"
+
+
 def save_message(
     chat_id: str,
     role: str,
@@ -239,23 +282,32 @@ def save_message(
     now = datetime.utcnow().isoformat()
 
     with get_db_connection() as conn:
-        exists = conn.execute(
-            "SELECT 1 FROM conversations WHERE id = ?", (chat_id,)
+        row = conn.execute(
+            "SELECT id, title FROM conversations WHERE id = ?", (chat_id,)
         ).fetchone()
-        if not exists and user_id:
-            initial_title = content[:32].strip() + ("..." if len(content) > 32 else "")
+
+        if not row and user_id:
+            initial_title = generate_smart_title(content) if role == "user" else "New Conversation"
             conn.execute(
                 """
                 INSERT INTO conversations (id, user_id, title, created_at, updated_at)
                 VALUES (?, ?, ?, ?, ?)
                 """,
-                (chat_id, user_id, initial_title or "New Conversation", now, now),
+                (chat_id, user_id, initial_title, now, now),
             )
-        else:
-            conn.execute(
-                "UPDATE conversations SET updated_at = ? WHERE id = ?",
-                (now, chat_id),
-            )
+        elif row:
+            # If current title is generic "New Conversation" and user sent first message, update to smart title
+            if role == "user" and row["title"] in ("New Conversation", "New chat", "", None):
+                new_title = generate_smart_title(content)
+                conn.execute(
+                    "UPDATE conversations SET title = ?, updated_at = ? WHERE id = ?",
+                    (new_title, now, chat_id),
+                )
+            else:
+                conn.execute(
+                    "UPDATE conversations SET updated_at = ? WHERE id = ?",
+                    (now, chat_id),
+                )
 
         cursor = conn.execute(
             """
