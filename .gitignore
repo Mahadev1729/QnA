@@ -1,4 +1,22 @@
+# Environments
 /qnaenv
 .venv
 .env
+
+# Database
 chat_history.db
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Node / Frontend
+frontend/node_modules/
+frontend/dist/
+.eslintcache
+
+# OS
+.DS_Store
+Thumbs.db

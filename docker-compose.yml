@@ -1,0 +1,26 @@
+version: '3.8'
+
+services:
+  quickanswer-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: quickanswer-qna
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    environment:
+      - PORT=8000
+    volumes:
+      - ./data:/app/data
+      - chat_data:/app
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+volumes:
+  chat_data:
