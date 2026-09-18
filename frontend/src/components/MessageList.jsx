@@ -1,7 +1,17 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-import { Sparkles, User, Search, Globe, AlertCircle, Copy, Check } from 'lucide-react';
+import {
+  Sparkles,
+  User,
+  Search,
+  Globe,
+  AlertCircle,
+  Copy,
+  Check,
+  Volume2,
+  VolumeX,
+} from 'lucide-react';
 import WelcomeScreen from './WelcomeScreen';
 
 export default function MessageList({
@@ -13,11 +23,62 @@ export default function MessageList({
   messagesEndRef,
 }) {
   const [copiedId, setCopiedId] = useState(null);
+  const [speakingId, setSpeakingId] = useState(null);
+
+  useEffect(() => {
+    // Cleanup speech on unmount
+    return () => {
+      if (window.speechSynthesis) {
+        window.speechSynthesis.cancel();
+      }
+    };
+  }, []);
 
   const handleCopy = (id, text) => {
     navigator.clipboard.writeText(text);
     setCopiedId(id);
     setTimeout(() => setCopiedId(null), 2000);
+  };
+
+  const cleanTextForSpeech = (markdown) => {
+    return markdown
+      .replace(/```[\s\S]*?```/g, 'Code snippet omitted.') // replace code blocks
+      .replace(/`([^`]+)`/g, '$1') // inline code
+      .replace(/\[([^\]]+)\]\([^\)]+\)/g, '$1') // markdown links
+      .replace(/[#*_\->~]/g, '') // formatting symbols
+      .replace(/\n+/g, '. ')
+      .trim();
+  };
+
+  const handleSpeak = (id, text) => {
+    if (!window.speechSynthesis) {
+      alert('Text-to-speech is not supported in this browser.');
+      return;
+    }
+
+    if (speakingId === id) {
+      // Stop speaking
+      window.speechSynthesis.cancel();
+      setSpeakingId(null);
+    } else {
+      window.speechSynthesis.cancel(); // Stop any other speech
+      const cleanText = cleanTextForSpeech(text);
+      const utterance = new SpeechSynthesisUtterance(cleanText);
+      utterance.rate = 1.0;
+      utterance.pitch = 1.0;
+      utterance.lang = 'en-US';
+
+      utterance.onend = () => {
+        setSpeakingId(null);
+      };
+
+      utterance.onerror = () => {
+        setSpeakingId(null);
+      };
+
+      setSpeakingId(id);
+      window.speechSynthesis.speak(utterance);
+    }
   };
 
   return (
@@ -62,11 +123,12 @@ export default function MessageList({
                         ))}
                       </div>
                     )}
+
+                    {/* Action Bar (Copy + Speak Aloud) */}
                     {!isStreaming && msg.content && (
-                      <div style={{ marginTop: '10px', display: 'flex', gap: '8px' }}>
+                      <div className="assistant-action-bar">
                         <button
-                          className="icon-btn-ghost"
-                          style={{ width: '28px', height: '28px', padding: '4px' }}
+                          className="icon-btn-ghost action-btn-chatgpt"
                           title="Copy response"
                           onClick={() => handleCopy(msg.id, msg.content)}
                         >
@@ -74,6 +136,24 @@ export default function MessageList({
                             <Check size={14} color="var(--primary)" />
                           ) : (
                             <Copy size={14} />
+                          )}
+                        </button>
+
+                        <button
+                          className={`icon-btn-ghost action-btn-chatgpt ${
+                            speakingId === msg.id ? 'speaking-active' : ''
+                          }`}
+                          title={
+                            speakingId === msg.id
+                              ? 'Stop reading aloud'
+                              : 'Read response aloud (Text-to-Speech)'
+                          }
+                          onClick={() => handleSpeak(msg.id, msg.content)}
+                        >
+                          {speakingId === msg.id ? (
+                            <VolumeX size={14} color="var(--primary)" />
+                          ) : (
+                            <Volume2 size={14} />
                           )}
                         </button>
                       </div>
