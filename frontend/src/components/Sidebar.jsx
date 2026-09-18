@@ -1,5 +1,12 @@
 import React from 'react';
-import { MessageSquare, Plus, Trash2, X, LogOut } from 'lucide-react';
+import {
+  SquarePen,
+  Trash2,
+  PanelLeftClose,
+  MessageSquare,
+  LogOut,
+  Sparkles,
+} from 'lucide-react';
 
 export default function Sidebar({
   sidebarOpen,
@@ -13,35 +20,40 @@ export default function Sidebar({
   handleLogout,
 }) {
   return (
-    <aside className={`sidebar ${sidebarOpen ? 'open' : ''}`}>
-      {/* Brand Header */}
+    <aside className={`sidebar ${sidebarOpen ? 'open' : 'closed'}`}>
+      {/* Top Header */}
       <div className="sidebar-header">
-        <div className="brand">
-          <div className="brand-icon">Q</div>
-          <div className="brand-title">QuickAnswer</div>
+        <div className="sidebar-top-actions">
+          <div className="brand-wrapper" onClick={startNewChat}>
+            <div className="brand-icon-chatgpt">
+              <Sparkles size={16} />
+            </div>
+            <span className="brand-name-chatgpt">QuickAnswer</span>
+          </div>
+          <button
+            className="icon-btn-ghost"
+            onClick={() => setSidebarOpen(false)}
+            title="Close sidebar"
+            aria-label="Close sidebar"
+          >
+            <PanelLeftClose size={18} />
+          </button>
         </div>
-        <button
-          className="icon-btn mobile-menu-btn"
-          onClick={() => setSidebarOpen(false)}
-          aria-label="Close sidebar"
-        >
-          <X size={16} />
-        </button>
       </div>
 
-      {/* New Chat Action */}
-      <div className="sidebar-actions">
-        <button className="new-chat-btn" onClick={startNewChat} id="btn-new-chat">
-          <Plus size={15} />
-          <span>New Chat</span>
-        </button>
-      </div>
+      {/* New Chat Button */}
+      <button className="new-chat-btn-chatgpt" onClick={startNewChat} id="btn-new-chat">
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <SquarePen size={16} />
+          <span>New chat</span>
+        </div>
+      </button>
 
-      {/* Conversation Threads */}
+      {/* Conversation List */}
       <div className="chat-list-section">
         {conversations.length === 0 ? (
-          <div style={{ padding: '16px 12px', fontSize: '13px', color: 'var(--text-dim)' }}>
-            No chats yet
+          <div style={{ padding: '16px 14px', fontSize: '13px', color: 'var(--text-dim)' }}>
+            No chat history
           </div>
         ) : (
           conversations.map((conv) => (
@@ -66,9 +78,9 @@ export default function Sidebar({
         )}
       </div>
 
-      {/* User Profile Bar */}
+      {/* User Profile / Bottom */}
       {currentUser && (
-        <div className="user-profile-bar">
+        <div className="user-profile-bar" onClick={handleLogout} title="Click to Sign Out">
           <div className="user-profile-info">
             <div className="user-avatar-initial">
               {currentUser.username ? currentUser.username[0].toUpperCase() : 'U'}
@@ -78,9 +90,7 @@ export default function Sidebar({
               <div className="user-email">{currentUser.email}</div>
             </div>
           </div>
-          <button className="logout-btn" onClick={handleLogout} title="Sign Out">
-            <LogOut size={15} />
-          </button>
+          <LogOut size={15} color="var(--text-dim)" />
         </div>
       )}
     </aside>

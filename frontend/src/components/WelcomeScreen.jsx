@@ -1,54 +1,54 @@
 import React from 'react';
-import { Sparkles, Compass, Code, Zap } from 'lucide-react';
+import { Compass, Code, Lightbulb, GraduationCap } from 'lucide-react';
 
 const STARTER_PROMPTS = [
   {
     icon: Compass,
-    title: 'Live Web Search',
-    prompt: 'What are the top AI releases and technology updates this week?',
+    title: 'Explore live web facts',
+    prompt: 'What are the top AI breakthroughs and tech releases this week?',
+    desc: 'Uses real-time Google search for fresh data',
   },
   {
     icon: Code,
-    title: 'Code Architecture',
+    title: 'Write Python & FastAPI',
     prompt: 'How to build high-performance async streaming APIs in FastAPI?',
+    desc: 'Code snippets & architectural patterns',
   },
   {
-    icon: Zap,
-    title: 'Deep Concept',
+    icon: GraduationCap,
+    title: 'Explain complex concepts',
     prompt: 'Explain the Transformer attention mechanism with an intuitive mental model.',
+    desc: 'Clear mental model with key takeaways',
   },
   {
-    icon: Sparkles,
-    title: 'Product Ideas',
-    prompt: 'Suggest 3 creative ways to use generative AI for developer productivity.',
+    icon: Lightbulb,
+    title: 'Brainstorm creative ideas',
+    prompt: 'Suggest 3 unique SaaS ideas leveraging real-time AI reasoning.',
+    desc: 'Actionable blueprints and market angles',
   },
 ];
 
 export default function WelcomeScreen({ handleSendMessage }) {
   return (
     <div className="welcome-container">
-      <div className="welcome-icon-glow">
-        <Sparkles size={22} color="#fff" />
-      </div>
-      <h1 className="welcome-heading">Where curiosity meets clarity.</h1>
-      <p className="welcome-desc">
-        Instant reasoning powered by Groq, with live Google web search whenever freshness matters.
-      </p>
+      <h1 className="welcome-heading-chatgpt">What can I help with today?</h1>
 
-      <div className="suggestion-grid">
+      <div className="prompt-suggestions-row">
         {STARTER_PROMPTS.map((item, index) => {
           const Icon = item.icon;
           return (
             <div
               key={index}
-              className="suggestion-card"
+              className="prompt-pill-card"
               onClick={() => handleSendMessage(item.prompt)}
             >
-              <div className="suggestion-card-title">
-                <Icon size={14} color="var(--primary)" />
-                <span>{item.title}</span>
+              <div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+                  <Icon size={16} color="var(--primary)" />
+                  <span className="prompt-pill-title">{item.title}</span>
+                </div>
+                <div className="prompt-pill-desc">{item.desc}</div>
               </div>
-              <div className="suggestion-card-prompt">{item.prompt}</div>
             </div>
           );
         })}

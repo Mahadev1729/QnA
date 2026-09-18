@@ -1,7 +1,7 @@
-import React from 'react';
+import React, { useState } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-import { Bot, User, Search, Globe, AlertCircle } from 'lucide-react';
+import { Sparkles, User, Search, Globe, AlertCircle, Copy, Check } from 'lucide-react';
 import WelcomeScreen from './WelcomeScreen';
 
 export default function MessageList({
@@ -12,6 +12,14 @@ export default function MessageList({
   handleSendMessage,
   messagesEndRef,
 }) {
+  const [copiedId, setCopiedId] = useState(null);
+
+  const handleCopy = (id, text) => {
+    navigator.clipboard.writeText(text);
+    setCopiedId(id);
+    setTimeout(() => setCopiedId(null), 2000);
+  };
+
   return (
     <div className="messages-container">
       {messages.length === 0 ? (
@@ -23,8 +31,8 @@ export default function MessageList({
             className={`message-row ${msg.role === 'user' ? 'user' : 'assistant'}`}
           >
             {msg.role === 'assistant' && (
-              <div className="avatar bot">
-                <Bot size={15} />
+              <div className="avatar-chatgpt bot">
+                <Sparkles size={15} />
               </div>
             )}
             <div className="message-content-wrapper">
@@ -45,12 +53,29 @@ export default function MessageList({
                     )}
                     {msg.sources && msg.sources.length > 0 && (
                       <div className="sources-box">
+                        <Globe size={13} color="var(--accent-cyan)" />
                         <span>Sources:</span>
                         {msg.sources.map((src, i) => (
                           <span key={i} className="source-tag">
-                            <Globe size={11} /> {src.name}
+                            {src.name}
                           </span>
                         ))}
+                      </div>
+                    )}
+                    {!isStreaming && msg.content && (
+                      <div style={{ marginTop: '10px', display: 'flex', gap: '8px' }}>
+                        <button
+                          className="icon-btn-ghost"
+                          style={{ width: '28px', height: '28px', padding: '4px' }}
+                          title="Copy response"
+                          onClick={() => handleCopy(msg.id, msg.content)}
+                        >
+                          {copiedId === msg.id ? (
+                            <Check size={14} color="var(--primary)" />
+                          ) : (
+                            <Copy size={14} />
+                          )}
+                        </button>
                       </div>
                     )}
                   </div>
@@ -60,7 +85,7 @@ export default function MessageList({
               </div>
             </div>
             {msg.role === 'user' && (
-              <div className="avatar user">
+              <div className="avatar-chatgpt user">
                 <User size={15} />
               </div>
             )}
