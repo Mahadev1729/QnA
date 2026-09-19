@@ -307,8 +307,11 @@ export default function App() {
   // Loading state
   if (authLoading) {
     return (
-      <div style={{ height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--bg-main)' }}>
-        <Loader2 size={32} className="animate-spin" color="var(--primary)" />
+      <div className="app-loading-screen">
+        <div className="app-loading-content">
+          <Loader2 size={36} className="animate-spin" color="var(--primary)" />
+          <span className="app-loading-text">Loading QuickAnswer...</span>
+        </div>
       </div>
     );
   }
