@@ -1614,3 +1614,25 @@ body {
   transform: scale(1.08);
   box-shadow: 0 0 16px rgba(16, 163, 127, 0.5);
 }
+
+.voice-ask-now-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: linear-gradient(135deg, #10a37f 0%, #0d8c6d 100%);
+  color: #fff;
+  border: none;
+  border-radius: 999px;
+  padding: 8px 18px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 8px;
+  box-shadow: 0 4px 15px rgba(16, 163, 127, 0.4);
+  animation: fadeIn 0.2s ease, pulse-ask 2s infinite ease-in-out;
+}
+
+@keyframes pulse-ask {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.04); }
+}

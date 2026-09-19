@@ -5,9 +5,10 @@ import {
   MicOff,
   Volume2,
   VolumeX,
+  Send,
+  Sparkles,
 } from 'lucide-react';
 import VoiceOrbCanvas from './VoiceOrbCanvas';
-import { transcribeAudio } from '../services/api';
 
 export default function VoiceOrbModal({
   isOpen,
@@ -30,38 +31,44 @@ export default function VoiceOrbModal({
   const analyserRef = useRef(null);
   const micStreamRef = useRef(null);
   const animAudioRef = useRef(null);
-  const mediaRecorderRef = useRef(null);
-  const audioChunksRef = useRef([]);
   const isSpeakingUtteranceRef = useRef(false);
   const lastProcessedMsgIdRef = useRef(null);
+  const activeTranscriptRef = useRef('');
+
+  // Unlock AudioContext and SpeechSynthesis on Mobile (iOS Safari & Android Chrome)
+  const unlockMobileAudio = () => {
+    try {
+      if (window.speechSynthesis) {
+        window.speechSynthesis.resume();
+        const dummyUtterance = new SpeechSynthesisUtterance('');
+        window.speechSynthesis.speak(dummyUtterance);
+      }
+      if (audioContextRef.current && audioContextRef.current.state === 'suspended') {
+        audioContextRef.current.resume();
+      }
+    } catch (e) {
+      console.warn('Audio unlock error:', e);
+    }
+  };
 
   // Setup Web Audio API Mic Analyser for live frequency visualization
   useEffect(() => {
     if (!isOpen) return;
 
+    unlockMobileAudio();
+
     let isCancelled = false;
 
     const setupAudioAnalyser = async () => {
       try {
-        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        const stream = await navigator.mediaDevices.getUserMedia({
+          audio: { echoCancellation: true, noiseSuppression: true },
+        });
         if (isCancelled) {
           stream.getTracks().forEach((track) => track.stop());
           return;
         }
         micStreamRef.current = stream;
-
-        // Initialize MediaRecorder for Groq Whisper
-        try {
-          const mediaRecorder = new MediaRecorder(stream);
-          mediaRecorder.ondataavailable = (e) => {
-            if (e.data.size > 0) {
-              audioChunksRef.current.push(e.data);
-            }
-          };
-          mediaRecorderRef.current = mediaRecorder;
-        } catch (e) {
-          console.warn('MediaRecorder not supported, using Web Speech API fallback', e);
-        }
 
         const AudioCtx = window.AudioContext || window.webkitAudioContext;
         if (!AudioCtx) return;
@@ -86,10 +93,10 @@ export default function VoiceOrbModal({
             sum += dataArray[i];
           }
           const average = sum / dataArray.length;
-          const normalized = Math.min(1, average / 128);
+          const normalized = Math.min(1, average / 110);
 
           if (voiceState === 'speaking') {
-            setAudioLevel(0.4 + Math.sin(Date.now() / 120) * 0.35);
+            setAudioLevel(0.35 + Math.sin(Date.now() / 110) * 0.3);
           } else if (voiceState === 'listening' && !isMicMuted) {
             setAudioLevel(normalized);
           } else {
@@ -119,7 +126,7 @@ export default function VoiceOrbModal({
     };
   }, [isOpen, voiceState, isMicMuted]);
 
-  // Speech-to-Text Recognition Setup (Groq Whisper + Web Speech Hybrid)
+  // Speech-to-Text Recognition Setup (Optimized for Mobile browsers)
   useEffect(() => {
     if (!isOpen) return;
 
@@ -127,7 +134,7 @@ export default function VoiceOrbModal({
       window.SpeechRecognition || window.webkitSpeechRecognition;
 
     if (!SpeechRecognition) {
-      setLiveTranscript('Voice recognition ready. Speak naturally...');
+      setLiveTranscript('Voice recognition is not supported in this browser.');
       return;
     }
 
@@ -151,33 +158,37 @@ export default function VoiceOrbModal({
       const currentSpeech = (final || interim).trim();
       if (!currentSpeech) return;
 
-      // Barge-in: If AI is speaking and user speaks, stop AI voice immediately!
+      // Barge-in: If AI is speaking and user speaks, immediately cancel AI speech
       if (voiceState === 'speaking' || isSpeakingUtteranceRef.current) {
         if (window.speechSynthesis) window.speechSynthesis.cancel();
         isSpeakingUtteranceRef.current = false;
         setVoiceState('listening');
       }
 
+      activeTranscriptRef.current = currentSpeech;
       setLiveTranscript(currentSpeech);
 
-      // Auto-send after 1.2 seconds of silence
+      // Reset auto-send silence timer
       if (silenceTimerRef.current) clearTimeout(silenceTimerRef.current);
 
       silenceTimerRef.current = setTimeout(() => {
-        if (currentSpeech && voiceState === 'listening') {
-          triggerQuery(currentSpeech);
+        if (activeTranscriptRef.current && voiceState === 'listening') {
+          triggerQuery(activeTranscriptRef.current);
         }
-      }, 1200);
+      }, 1300); // 1.3s of silence triggers automatic ask
     };
 
     recognition.onerror = (e) => {
       if (e.error !== 'no-speech') {
-        console.warn('Speech recognition status:', e.error);
+        console.warn('Speech recognition warning:', e.error);
       }
     };
 
     recognition.onend = () => {
-      if (isOpen && !isMicMuted && voiceState === 'listening') {
+      // Mobile Safari / Chrome auto-stops on silence: if we have pending transcript, submit it!
+      if (activeTranscriptRef.current && voiceState === 'listening') {
+        triggerQuery(activeTranscriptRef.current);
+      } else if (isOpen && !isMicMuted && voiceState === 'listening') {
         try {
           recognition.start();
         } catch (e) {}
@@ -206,9 +217,13 @@ export default function VoiceOrbModal({
 
   // Handle submitting query to LLM
   const triggerQuery = (queryText) => {
-    if (!queryText.trim()) return;
+    const cleanText = (queryText || activeTranscriptRef.current).trim();
+    if (!cleanText) return;
+
+    unlockMobileAudio();
     setVoiceState('thinking');
     setAiSpokenText('');
+    activeTranscriptRef.current = '';
 
     if (recognitionRef.current) {
       try {
@@ -216,7 +231,7 @@ export default function VoiceOrbModal({
       } catch (e) {}
     }
 
-    handleSendMessage(queryText);
+    handleSendMessage(cleanText);
   };
 
   // Watch for latest assistant response messages and speak them
@@ -233,6 +248,7 @@ export default function VoiceOrbModal({
             setVoiceState('speaking');
           }
 
+          // When streaming finishes, speak the response
           if (!isStreaming && lastMsg.id !== lastProcessedMsgIdRef.current) {
             lastProcessedMsgIdRef.current = lastMsg.id;
             speakAssistantResponse(lastMsg.content);
@@ -242,7 +258,7 @@ export default function VoiceOrbModal({
     }
   }, [messages, isStreaming, isOpen, voiceState]);
 
-  // Text-To-Speech Playback with Natural Voices
+  // Text-To-Speech Playback with Mobile Compatibility
   const speakAssistantResponse = (text) => {
     if (isAudioMuted || !window.speechSynthesis) {
       setVoiceState('listening');
@@ -251,8 +267,9 @@ export default function VoiceOrbModal({
     }
 
     window.speechSynthesis.cancel();
+    window.speechSynthesis.resume();
 
-    // Clean text of markdown, code blocks, and formatting
+    // Clean text of markdown, code blocks, citations
     const cleanText = text
       .replace(/```[\s\S]*?```/g, 'Code block omitted.')
       .replace(/`([^`]+)`/g, '$1')
@@ -292,10 +309,12 @@ export default function VoiceOrbModal({
       isSpeakingUtteranceRef.current = false;
       setVoiceState('listening');
       setLiveTranscript('');
+      activeTranscriptRef.current = '';
       restartListening();
     };
 
-    utterance.onerror = () => {
+    utterance.onerror = (e) => {
+      console.warn('Speech synthesis ended/errored:', e);
       isSpeakingUtteranceRef.current = false;
       setVoiceState('listening');
       restartListening();
@@ -313,6 +332,7 @@ export default function VoiceOrbModal({
   };
 
   const toggleMic = () => {
+    unlockMobileAudio();
     if (isMicMuted) {
       setIsMicMuted(false);
       restartListening();
@@ -325,6 +345,7 @@ export default function VoiceOrbModal({
   };
 
   const toggleAudio = () => {
+    unlockMobileAudio();
     if (isAudioMuted) {
       setIsAudioMuted(false);
     } else {
@@ -338,14 +359,18 @@ export default function VoiceOrbModal({
   if (!isOpen) return null;
 
   return (
-    <div className="voice-modal-overlay">
+    <div
+      className="voice-modal-overlay"
+      onClick={unlockMobileAudio}
+      onTouchStart={unlockMobileAudio}
+    >
       {/* Top Controls Bar */}
       <div className="voice-modal-header">
         <div className="voice-status-pill">
           {voiceState === 'listening' && (
             <>
               <span className="pulse-dot green"></span>
-              <span>Listening to you...</span>
+              <span>Listening...</span>
             </>
           )}
           {voiceState === 'thinking' && (
@@ -376,14 +401,22 @@ export default function VoiceOrbModal({
       </div>
 
       {/* Central 3D Dynamic Audio Visualizer Orb */}
-      <div className="voice-modal-center">
+      <div
+        className="voice-modal-center"
+        onClick={() => {
+          unlockMobileAudio();
+          if (liveTranscript && voiceState === 'listening') {
+            triggerQuery(liveTranscript);
+          }
+        }}
+      >
         <VoiceOrbCanvas state={voiceState} audioLevel={audioLevel} />
 
         {/* Live Subtitles / Dynamic Transcripts */}
         <div className="voice-subtitles-box">
           {voiceState === 'listening' && (
             <p className="voice-subtitle-text user">
-              {liveTranscript || 'Start speaking naturally...'}
+              {liveTranscript || 'Speak your question...'}
             </p>
           )}
           {(voiceState === 'thinking' || voiceState === 'speaking') && (
@@ -398,6 +431,20 @@ export default function VoiceOrbModal({
             </p>
           )}
         </div>
+
+        {/* Mobile Quick Action Pill if user has spoken */}
+        {voiceState === 'listening' && liveTranscript && (
+          <button
+            className="voice-ask-now-btn"
+            onClick={(e) => {
+              e.stopPropagation();
+              triggerQuery(liveTranscript);
+            }}
+          >
+            <Send size={14} />
+            <span>Ask Now</span>
+          </button>
+        )}
       </div>
 
       {/* Bottom Action Controls */}
@@ -407,7 +454,7 @@ export default function VoiceOrbModal({
           onClick={toggleMic}
           title={isMicMuted ? 'Unmute microphone' : 'Mute microphone'}
         >
-          {isMicMuted ? <MicOff size={18} /> : <Mic size={18} />}
+          {isMicMuted ? <MicOff size={17} /> : <Mic size={17} />}
           <span>{isMicMuted ? 'Mic Muted' : 'Mic On'}</span>
         </button>
 
@@ -416,8 +463,8 @@ export default function VoiceOrbModal({
           onClick={toggleAudio}
           title={isAudioMuted ? 'Unmute audio' : 'Mute audio'}
         >
-          {isAudioMuted ? <VolumeX size={18} /> : <Volume2 size={18} />}
-          <span>{isAudioMuted ? 'Sound Off' : 'Sound On'}</span>
+          {isAudioMuted ? <VolumeX size={17} /> : <Volume2 size={17} />}
+          <span>{isAudioMuted ? 'Muted' : 'Sound On'}</span>
         </button>
       </div>
     </div>
