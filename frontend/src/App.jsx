@@ -367,8 +367,6 @@ export default function App() {
           startNewChat={startNewChat}
           currentUser={currentUser}
           handleLogout={handleLogout}
-          selectedModel={selectedModel}
-          setSelectedModel={handleSetSelectedModel}
         />
 
         <MessageList
@@ -387,6 +385,8 @@ export default function App() {
           isStreaming={isStreaming}
           textareaRef={textareaRef}
           handleKeyDown={handleKeyDown}
+          selectedModel={selectedModel}
+          setSelectedModel={handleSetSelectedModel}
         />
       </main>
     </div>
