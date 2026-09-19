@@ -55,6 +55,27 @@ body {
   position: relative;
 }
 
+/* Mobile Sidebar Backdrop */
+.sidebar-backdrop {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(2px);
+  z-index: 45;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s ease;
+}
+
+@media (max-width: 768px) {
+  .sidebar-backdrop.visible {
+    display: block;
+    opacity: 1;
+    pointer-events: auto;
+  }
+}
+
 /* ==========================================================================
    Sidebar (ChatGPT Style)
    ========================================================================== */
@@ -75,20 +96,6 @@ body {
   min-width: 0;
   overflow: hidden;
   transform: translateX(-100%);
-}
-
-@media (max-width: 768px) {
-  .sidebar {
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    left: 0;
-    transform: translateX(-100%);
-    box-shadow: 20px 0 50px rgba(0, 0, 0, 0.7);
-  }
-  .sidebar.open {
-    transform: translateX(0);
-  }
 }
 
 .sidebar-header {
@@ -337,29 +344,81 @@ body {
   justify-content: space-between;
   padding: 0 16px;
   z-index: 10;
+  background: var(--bg-main);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
 }
 
 .header-left {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
+  min-width: 0;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
 }
 
 .model-selector-pill {
   display: flex;
   align-items: center;
   gap: 6px;
-  padding: 6px 12px;
+  padding: 5px 10px;
   border-radius: var(--radius-md);
-  font-size: 14px;
+  font-size: 13.5px;
   font-weight: 600;
   color: var(--text-main);
   cursor: pointer;
   transition: background 0.15s;
+  white-space: nowrap;
 }
 
 .model-selector-pill:hover {
   background: var(--bg-surface);
+}
+
+.model-name {
+  font-weight: 600;
+  color: #fff;
+}
+
+.model-badge {
+  font-size: 10.5px;
+  color: var(--text-dim);
+  font-weight: 500;
+  background: var(--bg-surface-hover);
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.header-new-chat-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.header-user-badge {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  padding: 2px;
+}
+
+.header-user-avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #10a37f 0%, #3b82f6 100%);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 8px rgba(16, 163, 127, 0.3);
 }
 
 /* ==========================================================================
@@ -986,4 +1045,132 @@ body {
   font-size: 12.5px;
   padding: 0;
   margin-left: 4px;
+}
+
+/* ==========================================================================
+   Responsive Breakpoints & Mobile Enhancements
+   ========================================================================== */
+
+/* Tablets & Mobile Devices (<= 768px) */
+@media (max-width: 768px) {
+  .sidebar {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: 280px;
+    max-width: 82vw;
+    z-index: 50;
+    transform: translateX(-100%);
+    box-shadow: 10px 0 35px rgba(0, 0, 0, 0.6);
+  }
+
+  .sidebar.open {
+    transform: translateX(0);
+  }
+
+  .sidebar.closed {
+    transform: translateX(-100%);
+  }
+
+  .chat-header {
+    padding: 0 10px;
+    height: 48px;
+  }
+
+  .model-badge {
+    display: none;
+  }
+
+  .model-selector-pill {
+    padding: 4px 8px;
+    font-size: 13px;
+  }
+
+  .welcome-container {
+    padding: 16px 12px;
+  }
+
+  .welcome-heading-chatgpt {
+    font-size: 22px;
+    margin-bottom: 20px;
+  }
+
+  .prompt-suggestions-row {
+    grid-template-columns: 1fr;
+    gap: 8px;
+    max-width: 100%;
+  }
+
+  .prompt-pill-card {
+    padding: 10px 12px;
+  }
+
+  .messages-container {
+    padding: 8px 10px 14px;
+  }
+
+  .message-row {
+    padding: 12px 4px;
+  }
+
+  .message-avatar {
+    width: 28px;
+    height: 28px;
+    font-size: 12px;
+  }
+
+  .input-section {
+    padding: 8px 10px 12px;
+    max-width: 100%;
+  }
+
+  .input-box-wrapper-chatgpt {
+    padding: 8px 10px 8px 12px;
+    border-radius: 20px;
+  }
+
+  .input-textarea-chatgpt {
+    font-size: 14px;
+  }
+
+  .auth-card {
+    padding: 24px 18px;
+    margin: 12px;
+    max-width: 92vw;
+  }
+}
+
+/* Small Mobile Phones (<= 480px) */
+@media (max-width: 480px) {
+  .chat-header {
+    padding: 0 8px;
+    height: 46px;
+  }
+
+  .model-name {
+    font-size: 12.5px;
+  }
+
+  .icon-btn-ghost {
+    width: 32px;
+    height: 32px;
+  }
+
+  .welcome-heading-chatgpt {
+    font-size: 20px;
+  }
+
+  .prompt-pill-desc {
+    display: none;
+  }
+
+  .input-disclaimer {
+    font-size: 10px;
+    padding-top: 4px;
+  }
+
+  .auth-brand .brand-title {
+    font-size: 16px;
+  }
 }

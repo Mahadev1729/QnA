@@ -327,6 +327,13 @@ export default function App() {
 
   return (
     <div className="app-container">
+      {/* Mobile Backdrop */}
+      <div
+        className={`sidebar-backdrop ${sidebarOpen ? 'visible' : ''}`}
+        onClick={() => setSidebarOpen(false)}
+        aria-hidden="true"
+      />
+
       {/* Sidebar Component */}
       <Sidebar
         sidebarOpen={sidebarOpen}
@@ -346,6 +353,9 @@ export default function App() {
           activeConversation={activeConversation}
           sidebarOpen={sidebarOpen}
           setSidebarOpen={setSidebarOpen}
+          startNewChat={startNewChat}
+          currentUser={currentUser}
+          handleLogout={handleLogout}
         />
 
         <MessageList

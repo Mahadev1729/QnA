@@ -1,31 +1,53 @@
 import React from 'react';
-import { PanelLeftOpen, ChevronDown, Sparkles } from 'lucide-react';
+import { PanelLeftOpen, PanelLeftClose, ChevronDown, Sparkles, SquarePen, LogOut } from 'lucide-react';
 
 export default function ChatHeader({
   activeConversation,
   sidebarOpen,
   setSidebarOpen,
+  startNewChat,
+  currentUser,
+  handleLogout,
 }) {
   return (
     <header className="chat-header">
       <div className="header-left">
-        {!sidebarOpen && (
+        <button
+          className="icon-btn-ghost sidebar-toggle-btn"
+          onClick={() => setSidebarOpen(!sidebarOpen)}
+          title={sidebarOpen ? "Close sidebar" : "Open sidebar"}
+          aria-label={sidebarOpen ? "Close sidebar" : "Open sidebar"}
+        >
+          {sidebarOpen ? <PanelLeftClose size={19} /> : <PanelLeftOpen size={19} />}
+        </button>
+
+        <div className="model-selector-pill">
+          <Sparkles size={14} color="var(--primary)" />
+          <span className="model-name">QuickAnswer</span>
+          <span className="model-badge">Groq + Search</span>
+          <ChevronDown size={13} color="var(--text-dim)" />
+        </div>
+      </div>
+
+      <div className="header-right">
+        {startNewChat && (
           <button
-            className="icon-btn-ghost"
-            onClick={() => setSidebarOpen(true)}
-            title="Open sidebar"
-            aria-label="Open sidebar"
+            className="icon-btn-ghost header-new-chat-btn"
+            onClick={startNewChat}
+            title="Start new chat"
+            aria-label="New chat"
           >
-            <PanelLeftOpen size={18} />
+            <SquarePen size={18} />
           </button>
         )}
-        <div className="model-selector-pill">
-          <span>QuickAnswer</span>
-          <span style={{ fontSize: '11px', color: 'var(--text-dim)', fontWeight: 'normal', background: 'var(--bg-surface-hover)', padding: '2px 6px', borderRadius: '4px' }}>
-            Groq + Search
-          </span>
-          <ChevronDown size={14} color="var(--text-dim)" />
-        </div>
+
+        {currentUser && (
+          <div className="header-user-badge" onClick={handleLogout} title="Click to Sign Out">
+            <div className="header-user-avatar">
+              {currentUser.username ? currentUser.username[0].toUpperCase() : 'U'}
+            </div>
+          </div>
+        )}
       </div>
     </header>
   );

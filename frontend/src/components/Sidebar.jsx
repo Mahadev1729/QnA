@@ -19,19 +19,33 @@ export default function Sidebar({
   currentUser,
   handleLogout,
 }) {
+  const handleItemClick = (id) => {
+    selectChat(id);
+    if (window.innerWidth <= 768) {
+      setSidebarOpen(false);
+    }
+  };
+
+  const handleNewChatClick = () => {
+    startNewChat();
+    if (window.innerWidth <= 768) {
+      setSidebarOpen(false);
+    }
+  };
+
   return (
     <aside className={`sidebar ${sidebarOpen ? 'open' : 'closed'}`}>
       {/* Top Header */}
       <div className="sidebar-header">
         <div className="sidebar-top-actions">
-          <div className="brand-wrapper" onClick={startNewChat}>
+          <div className="brand-wrapper" onClick={handleNewChatClick}>
             <div className="brand-icon-chatgpt">
               <Sparkles size={16} />
             </div>
             <span className="brand-name-chatgpt">QuickAnswer</span>
           </div>
           <button
-            className="icon-btn-ghost"
+            className="icon-btn-ghost close-sidebar-btn"
             onClick={() => setSidebarOpen(false)}
             title="Close sidebar"
             aria-label="Close sidebar"
@@ -42,7 +56,7 @@ export default function Sidebar({
       </div>
 
       {/* New Chat Button */}
-      <button className="new-chat-btn-chatgpt" onClick={startNewChat} id="btn-new-chat">
+      <button className="new-chat-btn-chatgpt" onClick={handleNewChatClick} id="btn-new-chat">
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
           <SquarePen size={16} />
           <span>New chat</span>
@@ -57,10 +71,10 @@ export default function Sidebar({
           </div>
         ) : (
           conversations.map((conv) => (
-            <button
+            <div
               key={conv.id}
               className={`chat-item ${conv.id === activeChatId ? 'active' : ''}`}
-              onClick={() => selectChat(conv.id)}
+              onClick={() => handleItemClick(conv.id)}
             >
               <div className="chat-item-content">
                 <MessageSquare size={14} style={{ flexShrink: 0, opacity: 0.7 }} />
@@ -73,7 +87,7 @@ export default function Sidebar({
               >
                 <Trash2 size={13} />
               </button>
-            </button>
+            </div>
           ))
         )}
       </div>
