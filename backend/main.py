@@ -5,6 +5,7 @@ from contextlib import asynccontextmanager
 from pathlib import Path
 from typing import List, Optional
 
+import httpx
 from dotenv import load_dotenv
 from fastapi import Depends, FastAPI, HTTPException, Request, status
 from fastapi.middleware.cors import CORSMiddleware
@@ -78,6 +79,10 @@ class RegisterRequest(BaseModel):
 class LoginRequest(BaseModel):
     email: str = Field(..., min_length=3)
     password: str
+
+
+class GoogleAuthRequest(BaseModel):
+    credential: str
 
 
 class AuthUserResponse(BaseModel):
@@ -158,6 +163,83 @@ def login_endpoint(req: LoginRequest):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid email or password.",
+        )
+
+    token = create_access_token({"sub": user["id"], "email": user["email"]})
+    return {
+        "token": token,
+        "user": {
+            "id": user["id"],
+            "email": user["email"],
+            "username": user["username"],
+            "created_at": user["created_at"],
+        },
+    }
+
+
+@app.get("/api/auth/config")
+def get_auth_config():
+    """Returns public authentication configuration such as Google Client ID."""
+    return {
+        "google_client_id": os.getenv("GOOGLE_CLIENT_ID", "").strip(),
+    }
+
+
+@app.post("/api/auth/google", response_model=AuthResponse)
+async def google_auth_endpoint(req: GoogleAuthRequest):
+    """
+    Verifies Google ID token from frontend and authenticates or registers the user.
+    """
+    if not req.credential:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Google credential token is required.",
+        )
+
+    try:
+        async with httpx.AsyncClient(timeout=10.0) as client:
+            res = await client.get(
+                f"https://oauth2.googleapis.com/tokeninfo?id_token={req.credential}"
+            )
+            if res.status_code != 200:
+                raise HTTPException(
+                    status_code=status.HTTP_401_UNAUTHORIZED,
+                    detail="Invalid or expired Google credential.",
+                )
+            google_data = res.json()
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to verify Google token: {str(e)}",
+        )
+
+    # Optional audience check if GOOGLE_CLIENT_ID is set
+    expected_client_id = os.getenv("GOOGLE_CLIENT_ID", "").strip()
+    if expected_client_id and google_data.get("aud") != expected_client_id:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Google token audience mismatch.",
+        )
+
+    email = google_data.get("email")
+    if not email:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Email address not provided by Google account.",
+        )
+
+    name = google_data.get("name") or google_data.get("given_name") or email.split("@")[0]
+
+    # Find or auto-register user
+    user = get_user_by_email(email)
+    if not user:
+        pwd_hash = hash_password(f"google_oauth_{uuid.uuid4().hex}")
+        user = create_user(
+            email=email,
+            username=name,
+            password_hash=pwd_hash,
         )
 
     token = create_access_token({"sub": user["id"], "email": user["email"]})

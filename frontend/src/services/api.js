@@ -52,6 +52,32 @@ export async function login(email, password) {
   return data;
 }
 
+export async function getAuthConfig() {
+  try {
+    const res = await fetch(`${API_BASE}/auth/config`);
+    if (!res.ok) return { google_client_id: '' };
+    return await res.json();
+  } catch (err) {
+    return { google_client_id: '' };
+  }
+}
+
+export async function loginWithGoogle(credential) {
+  const res = await fetch(`${API_BASE}/auth/google`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ credential }),
+  });
+  const data = await res.json();
+  if (!res.ok) {
+    throw new Error(data.detail || 'Google sign-in failed');
+  }
+  if (data.token) {
+    setAuthToken(data.token);
+  }
+  return data;
+}
+
 export async function getMe() {
   const token = getAuthToken();
   if (!token) return null;

@@ -7,6 +7,7 @@ import {
   deleteConversation,
   streamChat,
   login,
+  loginWithGoogle,
   register,
   getMe,
   setAuthToken,
@@ -111,6 +112,25 @@ export default function App() {
       }
     } catch (err) {
       setAuthError(err.message || 'Authentication failed');
+    } finally {
+      setAuthSubmitting(false);
+    }
+  };
+
+  const handleGoogleLogin = async (credential) => {
+    setAuthError('');
+    setAuthSuccess('');
+    setAuthSubmitting(true);
+    try {
+      const res = await loginWithGoogle(credential);
+      setCurrentUser(res.user);
+      setAuthPassword('');
+      setAuthEmail('');
+      setAuthUsername('');
+      setAuthSuccess('');
+      await loadUserConversations();
+    } catch (err) {
+      setAuthError(err.message || 'Google sign-in failed');
     } finally {
       setAuthSubmitting(false);
     }
@@ -298,6 +318,7 @@ export default function App() {
         setAuthSuccess={setAuthSuccess}
         authSubmitting={authSubmitting}
         handleAuthSubmit={handleAuthSubmit}
+        handleGoogleLogin={handleGoogleLogin}
       />
     );
   }

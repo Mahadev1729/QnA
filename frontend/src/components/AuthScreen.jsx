@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { Mail, Lock, User, ArrowRight, Loader2, AlertCircle, CheckCircle2 } from 'lucide-react';
+import { getAuthConfig } from '../services/api';
 
 export default function AuthScreen({
   authMode,
@@ -16,7 +17,63 @@ export default function AuthScreen({
   setAuthSuccess,
   authSubmitting,
   handleAuthSubmit,
+  handleGoogleLogin,
 }) {
+  const [googleClientId, setGoogleClientId] = useState('');
+  const googleBtnRef = useRef(null);
+
+  useEffect(() => {
+    getAuthConfig().then((cfg) => {
+      if (cfg && cfg.google_client_id) {
+        setGoogleClientId(cfg.google_client_id);
+      }
+    });
+  }, []);
+
+  useEffect(() => {
+    if (!googleClientId) return;
+
+    const initGoogleBtn = () => {
+      if (window.google?.accounts?.id && googleBtnRef.current) {
+        try {
+          window.google.accounts.id.initialize({
+            client_id: googleClientId,
+            callback: (response) => {
+              if (response.credential && handleGoogleLogin) {
+                handleGoogleLogin(response.credential);
+              }
+            },
+          });
+
+          googleBtnRef.current.innerHTML = '';
+          window.google.accounts.id.renderButton(googleBtnRef.current, {
+            theme: 'outline',
+            size: 'large',
+            type: 'standard',
+            text: authMode === 'login' ? 'signin_with' : 'signup_with',
+            shape: 'rectangular',
+            logo_alignment: 'left',
+            width: googleBtnRef.current.offsetWidth || 340,
+          });
+        } catch (e) {
+          console.error('Google Sign-In initialization error:', e);
+        }
+      }
+    };
+
+    if (window.google?.accounts?.id) {
+      initGoogleBtn();
+    } else {
+      const timer = setInterval(() => {
+        if (window.google?.accounts?.id) {
+          clearInterval(timer);
+          initGoogleBtn();
+        }
+      }, 300);
+      return () => clearInterval(timer);
+    }
+  }, [googleClientId, authMode]);
+
   return (
     <div className="auth-wrapper">
       <div className="auth-card">
@@ -43,6 +100,16 @@ export default function AuthScreen({
           <div className="auth-error-banner">
             <AlertCircle size={15} />
             <span>{authError}</span>
+          </div>
+        )}
+
+        {/* Google Sign In Container (when GOOGLE_CLIENT_ID configured) */}
+        {googleClientId && (
+          <div className="google-auth-section">
+            <div ref={googleBtnRef} className="google-btn-wrapper"></div>
+            <div className="auth-divider">
+              <span>OR</span>
+            </div>
           </div>
         )}
 
