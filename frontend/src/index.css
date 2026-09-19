@@ -31,6 +31,7 @@
   padding: 0;
 }
 
+html,
 body {
   background-color: var(--bg-main);
   color: var(--text-main);
@@ -39,12 +40,16 @@ body {
   -moz-osx-font-smoothing: grayscale;
   overflow: hidden;
   height: 100vh;
+  height: 100dvh;
   width: 100vw;
 }
 
 #root {
   height: 100vh;
+  height: 100dvh;
+  width: 100%;
   display: flex;
+  overflow: hidden;
 }
 
 .app-container {
@@ -331,6 +336,8 @@ body {
   display: flex;
   flex-direction: column;
   height: 100%;
+  min-height: 0;
+  overflow: hidden;
   background: var(--bg-main);
   position: relative;
   min-width: 0;
@@ -339,6 +346,7 @@ body {
 /* Top Header Bar */
 .chat-header {
   height: 52px;
+  flex-shrink: 0;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -473,7 +481,9 @@ body {
    ========================================================================== */
 .messages-container {
   flex: 1;
+  min-height: 0;
   overflow-y: auto;
+  overflow-x: hidden;
   padding: 20px 16px 30px;
   display: flex;
   flex-direction: column;
@@ -651,6 +661,7 @@ body {
    Input Area (ChatGPT Style Capsule)
    ========================================================================== */
 .input-section {
+  flex-shrink: 0;
   padding: 0 16px 20px;
   max-width: 760px;
   width: 100%;
