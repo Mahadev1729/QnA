@@ -42,7 +42,11 @@ def parse_mysql_config() -> Dict[str, Any]:
             clean_url = "mysql://" + clean_url[len("mysql+pymysql://"):]
         
         parsed = urllib.parse.urlparse(clean_url)
-        db_name = parsed.path.lstrip("/").split("?")[0] or "test"
+        raw_db = parsed.path.lstrip("/").split("?")[0]
+        if raw_db in ("sys", "information_schema", "mysql", "performance_schema", ""):
+            db_name = "test"
+        else:
+            db_name = raw_db
         
         # TiDB / Cloud MySQL SSL Context
         ssl_ctx = ssl.create_default_context()
