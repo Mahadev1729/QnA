@@ -1,0 +1,15 @@
+.git
+.gitignore
+.env
+.devcontainer
+qnaenv
+venv
+.venv
+__pycache__
+*.pyc
+*.db
+chat_history.db
+frontend/node_modules
+frontend/dist
+.DS_Store
+Thumbs.db
