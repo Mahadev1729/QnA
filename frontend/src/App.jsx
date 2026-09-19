@@ -18,6 +18,7 @@ import Sidebar from './components/Sidebar';
 import ChatHeader from './components/ChatHeader';
 import MessageList from './components/MessageList';
 import ChatInput from './components/ChatInput';
+import VoiceOrbModal from './components/VoiceOrbModal';
 
 export default function App() {
   // Authentication State
@@ -43,12 +44,13 @@ export default function App() {
   const [statusMessage, setStatusMessage] = useState('');
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
+  const [voiceModalOpen, setVoiceModalOpen] = useState(false);
 
   const handleSetSelectedModel = (modelId) => {
     setSelectedModel(modelId);
     try {
       localStorage.setItem('quickanswer_model', modelId);
-    } catch (e) {}
+    } catch (e) { }
   };
 
   const messagesEndRef = useRef(null);
@@ -229,14 +231,14 @@ export default function App() {
     setConversations((prev) =>
       prev.map((c) =>
         c.id === currentChatId &&
-        (!c.title || c.title === 'New Conversation' || c.title === 'New chat')
+          (!c.title || c.title === 'New Conversation' || c.title === 'New chat')
           ? {
-              ...c,
-              title:
-                text.length > 32
-                  ? text.substring(0, 30).trim() + '...'
-                  : text.trim(),
-            }
+            ...c,
+            title:
+              text.length > 32
+                ? text.substring(0, 30).trim() + '...'
+                : text.trim(),
+          }
           : c
       )
     );
@@ -277,10 +279,10 @@ export default function App() {
           prev.map((msg) =>
             msg.id === assistantMsgId
               ? {
-                  ...msg,
-                  content: doneData.full_content || accumulatedContent,
-                  sources: doneData.sources || [],
-                }
+                ...msg,
+                content: doneData.full_content || accumulatedContent,
+                sources: doneData.sources || [],
+              }
               : msg
           )
         );
@@ -387,8 +389,19 @@ export default function App() {
           handleKeyDown={handleKeyDown}
           selectedModel={selectedModel}
           setSelectedModel={handleSetSelectedModel}
+          onOpenVoiceModal={() => setVoiceModalOpen(true)}
         />
       </main>
+
+      {/* Full-Duplex Hands-Free Voice Mode Modal */}
+      <VoiceOrbModal
+        isOpen={voiceModalOpen}
+        onClose={() => setVoiceModalOpen(false)}
+        handleSendMessage={handleSendMessage}
+        isStreaming={isStreaming}
+        statusMessage={statusMessage}
+        messages={messages}
+      />
     </div>
   );
 }

@@ -7,7 +7,7 @@ from typing import List, Optional
 
 import httpx
 from dotenv import load_dotenv
-from fastapi import Depends, FastAPI, HTTPException, Request, status
+from fastapi import Depends, FastAPI, HTTPException, Request, status, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
@@ -381,6 +381,51 @@ async def chat_stream_endpoint(
             yield f"data: {json.dumps({'type': 'error', 'error': str(e)})}\n\n"
 
     return StreamingResponse(event_generator(), media_type="text/event-stream")
+
+
+@app.post("/api/transcribe")
+async def transcribe_audio(
+    file: UploadFile = File(...),
+    current_user: dict = Depends(get_current_user),
+):
+    """
+    Transcribes audio using Groq Whisper (whisper-large-v3-turbo).
+    """
+    groq_api_key = os.getenv("GROQ_API_KEY")
+    if not groq_api_key:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="GROQ_API_KEY is not configured.",
+        )
+
+    try:
+        audio_content = await file.read()
+        filename = file.filename or "speech.webm"
+        content_type = file.content_type or "audio/webm"
+
+        async with httpx.AsyncClient(timeout=30.0) as client:
+            response = await client.post(
+                "https://api.groq.com/openai/v1/audio/transcriptions",
+                headers={"Authorization": f"Bearer {groq_api_key}"},
+                files={"file": (filename, audio_content, content_type)},
+                data={"model": "whisper-large-v3-turbo"},
+            )
+
+            if response.status_code != 200:
+                raise HTTPException(
+                    status_code=response.status_code,
+                    detail=f"Groq Whisper transcription error: {response.text}",
+                )
+
+            result = response.json()
+            return {"transcript": result.get("text", "").strip()}
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Audio transcription failed: {str(e)}",
+        )
 
 
 # Static frontend hosting in production

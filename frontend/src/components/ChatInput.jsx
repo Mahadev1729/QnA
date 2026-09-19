@@ -12,6 +12,7 @@ import {
   Cpu,
   Check,
   ChevronUp,
+  AudioLines,
 } from 'lucide-react';
 
 export const GROQ_MODELS = [
@@ -66,6 +67,7 @@ export default function ChatInput({
   handleKeyDown,
   selectedModel = 'openai/gpt-oss-120b',
   setSelectedModel,
+  onOpenVoiceModal,
 }) {
   const [isListening, setIsListening] = useState(false);
   const [modelMenuOpen, setModelMenuOpen] = useState(false);
@@ -248,6 +250,20 @@ export default function ChatInput({
           </div>
 
           <div className="input-right-controls">
+            {/* Hands-Free Voice Assistant Mode */}
+            {onOpenVoiceModal && (
+              <button
+                type="button"
+                className="voice-mode-trigger-btn"
+                onClick={onOpenVoiceModal}
+                title="Start Hands-Free Voice Mode (Dynamic 3D Voice Orb)"
+                aria-label="Hands-Free Voice Mode"
+                disabled={isStreaming}
+              >
+                <AudioLines size={16} />
+              </button>
+            )}
+
             {/* Voice Dictation Button */}
             <button
               type="button"

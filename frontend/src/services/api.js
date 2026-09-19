@@ -212,3 +212,28 @@ export async function streamChat({
     onError?.(error.message);
   }
 }
+
+export async function transcribeAudio(audioBlob) {
+  const token = getAuthToken();
+  const formData = new FormData();
+  formData.append('file', audioBlob, 'speech.webm');
+
+  const headers = {};
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
+  }
+
+  const res = await fetch(`${API_BASE}/transcribe`, {
+    method: 'POST',
+    headers,
+    body: formData,
+  });
+
+  if (!res.ok) {
+    const errorData = await res.json().catch(() => ({}));
+    throw new Error(errorData.detail || 'Audio transcription failed');
+  }
+
+  return await res.json();
+}
+
