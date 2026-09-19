@@ -36,10 +36,20 @@ export default function App() {
   const [activeChatId, setActiveChatId] = useState(null);
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
+  const [selectedModel, setSelectedModel] = useState(() => {
+    return localStorage.getItem('quickanswer_model') || 'openai/gpt-oss-120b';
+  });
   const [isStreaming, setIsStreaming] = useState(false);
   const [statusMessage, setStatusMessage] = useState('');
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
+
+  const handleSetSelectedModel = (modelId) => {
+    setSelectedModel(modelId);
+    try {
+      localStorage.setItem('quickanswer_model', modelId);
+    } catch (e) {}
+  };
 
   const messagesEndRef = useRef(null);
   const textareaRef = useRef(null);
@@ -248,6 +258,7 @@ export default function App() {
     await streamChat({
       chatId: currentChatId,
       message: text,
+      model: selectedModel,
       onToken: (token) => {
         accumulatedContent += token;
         setMessages((prev) =>
@@ -356,6 +367,8 @@ export default function App() {
           startNewChat={startNewChat}
           currentUser={currentUser}
           handleLogout={handleLogout}
+          selectedModel={selectedModel}
+          setSelectedModel={handleSetSelectedModel}
         />
 
         <MessageList
