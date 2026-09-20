@@ -18,7 +18,6 @@ import Sidebar from './components/Sidebar';
 import ChatHeader from './components/ChatHeader';
 import MessageList from './components/MessageList';
 import ChatInput from './components/ChatInput';
-import VoiceOrbModal from './components/VoiceOrbModal';
 
 export default function App() {
   // Authentication State
@@ -44,7 +43,6 @@ export default function App() {
   const [statusMessage, setStatusMessage] = useState('');
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
-  const [voiceModalOpen, setVoiceModalOpen] = useState(false);
 
   const handleSetSelectedModel = (modelId) => {
     setSelectedModel(modelId);
@@ -392,19 +390,8 @@ export default function App() {
           handleKeyDown={handleKeyDown}
           selectedModel={selectedModel}
           setSelectedModel={handleSetSelectedModel}
-          onOpenVoiceModal={() => setVoiceModalOpen(true)}
         />
       </main>
-
-      {/* Full-Duplex Hands-Free Voice Mode Modal */}
-      <VoiceOrbModal
-        isOpen={voiceModalOpen}
-        onClose={() => setVoiceModalOpen(false)}
-        handleSendMessage={handleSendMessage}
-        isStreaming={isStreaming}
-        statusMessage={statusMessage}
-        messages={messages}
-      />
     </div>
   );
 }
