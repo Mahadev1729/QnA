@@ -12,7 +12,10 @@ import {
   Cpu,
   Check,
   ChevronUp,
+  Wand2,
+  RotateCcw,
 } from 'lucide-react';
+import { polishPrompt } from '../services/api';
 
 export const GROQ_MODELS = [
   {
@@ -69,6 +72,8 @@ export default function ChatInput({
 }) {
   const [isListening, setIsListening] = useState(false);
   const [modelMenuOpen, setModelMenuOpen] = useState(false);
+  const [isPolishing, setIsPolishing] = useState(false);
+  const [prevPromptBackup, setPrevPromptBackup] = useState(null);
   const recognitionRef = useRef(null);
   const modelMenuRef = useRef(null);
 
@@ -157,6 +162,36 @@ export default function ChatInput({
       setSelectedModel(modelId);
     }
     setModelMenuOpen(false);
+  };
+
+  const handlePolish = async () => {
+    const trimmed = input.trim();
+    if (!trimmed || isPolishing || isStreaming) return;
+
+    setIsPolishing(true);
+    try {
+      const data = await polishPrompt(trimmed);
+      if (data && data.polished_prompt) {
+        setPrevPromptBackup(trimmed);
+        setInput(data.polished_prompt);
+      }
+    } catch (err) {
+      console.warn('Failed to polish prompt:', err);
+    } finally {
+      setIsPolishing(false);
+    }
+  };
+
+  const handleUndoPolish = () => {
+    if (prevPromptBackup !== null) {
+      setInput(prevPromptBackup);
+      setPrevPromptBackup(null);
+    }
+  };
+
+  const handleSend = () => {
+    setPrevPromptBackup(null);
+    handleSendMessage();
   };
 
   return (
@@ -248,6 +283,36 @@ export default function ChatInput({
           </div>
 
           <div className="input-right-controls">
+            {/* 1-Click Undo Polish Button */}
+            {prevPromptBackup !== null && (
+              <button
+                type="button"
+                className="undo-polish-btn"
+                onClick={handleUndoPolish}
+                title="Undo AI polish & revert to previous text"
+                aria-label="Undo prompt polish"
+              >
+                <RotateCcw size={12} />
+                <span>Undo</span>
+              </button>
+            )}
+
+            {/* 1-Click Prompt Polisher (Magic Wand) */}
+            <button
+              type="button"
+              className={`wand-polish-btn ${isPolishing ? 'polishing' : ''}`}
+              onClick={handlePolish}
+              disabled={!input.trim() || isPolishing || isStreaming}
+              title="Polish & optimize your prompt with AI (Magic Wand)"
+              aria-label="Polish prompt"
+            >
+              {isPolishing ? (
+                <Loader2 size={15} className="animate-spin text-purple-400" />
+              ) : (
+                <Wand2 size={15} />
+              )}
+            </button>
+
             {/* Voice Dictation Button */}
             <button
               type="button"
@@ -267,7 +332,7 @@ export default function ChatInput({
             {/* Send Button */}
             <button
               className="send-btn-chatgpt"
-              onClick={() => handleSendMessage()}
+              onClick={handleSend}
               disabled={!input.trim() || isStreaming}
               id="btn-send-message"
               aria-label="Send message"

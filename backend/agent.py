@@ -194,3 +194,44 @@ async def generate_chat_response_stream(
 
     except Exception as e:
         yield {"type": "error", "error": str(e)}
+
+
+POLISH_SYSTEM_PROMPT = (
+    "You are an expert prompt engineer. Your job is to transform vague, brief, or draft user prompts "
+    "into highly effective, structured, and context-rich prompts for advanced LLMs.\n\n"
+    "Rules:\n"
+    "1. Clarify the objective, structure, constraints, edge cases, and best practices.\n"
+    "2. Preserve the user's core intent and subject matter.\n"
+    "3. Return ONLY the polished prompt text. Do NOT add preamble like 'Here is your prompt:' or conversational filler.\n"
+    "4. Keep it concise, punchy, and actionable (1 to 3 sentences maximum)."
+)
+
+
+async def polish_prompt_text(raw_prompt: str) -> str:
+    """Uses ultra-fast Groq models to optimize and expand a raw user prompt."""
+    if not raw_prompt or len(raw_prompt.strip()) < 2:
+        return raw_prompt
+
+    candidate_models = [
+        "groq/compound-mini",
+        "llama-3.1-8b-instant",
+        "openai/gpt-oss-20b",
+        "openai/gpt-oss-120b",
+    ]
+    messages = [
+        SystemMessage(content=POLISH_SYSTEM_PROMPT),
+        HumanMessage(content=f"Enhance and clarify this prompt for maximum response quality:\n\n{raw_prompt.strip()}"),
+    ]
+
+    for model_name in candidate_models:
+        try:
+            llm = get_llm(model_name=model_name)
+            response = await llm.ainvoke(messages)
+            text = response.content.strip().strip('"').strip("'")
+            if text:
+                return text
+        except Exception:
+            continue
+
+    return raw_prompt
+

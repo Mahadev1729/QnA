@@ -13,7 +13,7 @@ from fastapi.responses import FileResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, EmailStr, Field
 
-from backend.agent import generate_chat_response_stream
+from backend.agent import generate_chat_response_stream, polish_prompt_text
 from backend.auth import (
     create_access_token,
     get_current_user,
@@ -110,6 +110,15 @@ class SendMessageRequest(BaseModel):
     chat_id: str
     message: str = Field(..., min_length=1)
     model: Optional[str] = None
+
+
+class PolishRequest(BaseModel):
+    prompt: str = Field(..., min_length=1, max_length=2000)
+
+
+class PolishResponse(BaseModel):
+    original_prompt: str
+    polished_prompt: str
 
 
 class ConversationResponse(BaseModel):
@@ -425,6 +434,27 @@ async def transcribe_audio(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Audio transcription failed: {str(e)}",
+        )
+
+
+@app.post("/api/polish-prompt", response_model=PolishResponse)
+async def polish_prompt_endpoint(
+    req: PolishRequest,
+    current_user: Optional[dict] = Depends(get_current_user),
+):
+    """
+    Enhances and clarifies a user's prompt using Groq for optimal answering.
+    """
+    try:
+        polished = await polish_prompt_text(req.prompt)
+        return PolishResponse(
+            original_prompt=req.prompt,
+            polished_prompt=polished,
+        )
+    except Exception as e:
+        return PolishResponse(
+            original_prompt=req.prompt,
+            polished_prompt=req.prompt,
         )
 
 

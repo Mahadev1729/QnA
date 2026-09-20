@@ -966,6 +966,73 @@ body {
   gap: 8px;
 }
 
+/* Prompt Polisher (Magic Wand) & Undo Pill */
+.wand-polish-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-dim);
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.wand-polish-btn:hover:not(:disabled) {
+  background: rgba(168, 85, 247, 0.15);
+  color: #c084fc;
+  transform: scale(1.06);
+  box-shadow: 0 0 12px rgba(168, 85, 247, 0.3);
+}
+
+.wand-polish-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.wand-polish-btn.polishing {
+  background: rgba(168, 85, 247, 0.2);
+  color: #c084fc;
+  animation: wandPulse 1.2s infinite ease-in-out;
+}
+
+@keyframes wandPulse {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: 0 0 8px rgba(168, 85, 247, 0.3);
+  }
+  50% {
+    transform: scale(1.1);
+    box-shadow: 0 0 16px rgba(168, 85, 247, 0.6);
+  }
+}
+
+.undo-polish-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  color: var(--text-dim);
+  font-size: 11.5px;
+  font-weight: 500;
+  padding: 4px 9px;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  animation: fadeIn 0.2s ease;
+}
+
+.undo-polish-btn:hover {
+  background: rgba(255, 255, 255, 0.14);
+  color: var(--text-main);
+  border-color: rgba(255, 255, 255, 0.25);
+  transform: translateY(-1px);
+}
+
 /* Mic Button & Listening Animations */
 .mic-btn {
   background: transparent;

@@ -237,3 +237,27 @@ export async function transcribeAudio(audioBlob) {
   return await res.json();
 }
 
+export async function polishPrompt(rawPrompt) {
+  const token = getAuthToken();
+  const headers = {
+    'Content-Type': 'application/json',
+  };
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
+  }
+
+  const res = await fetch(`${API_BASE}/polish-prompt`, {
+    method: 'POST',
+    headers,
+    body: JSON.stringify({ prompt: rawPrompt }),
+  });
+
+  if (!res.ok) {
+    const errorData = await res.json().catch(() => ({}));
+    throw new Error(errorData.detail || 'Failed to polish prompt');
+  }
+
+  return await res.json();
+}
+
+
