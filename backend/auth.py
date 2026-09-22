@@ -88,4 +88,10 @@ async def get_current_user(
             headers={"WWW-Authenticate": "Bearer"},
         )
 
+    # Attach auth_provider and avatar_url for frontend presentation
+    user["auth_provider"] = payload.get(
+        "provider", "google" if "@gmail.com" in user.get("email", "") else "local"
+    )
+    user["avatar_url"] = payload.get("picture", None)
+
     return user

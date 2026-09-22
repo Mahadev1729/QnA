@@ -361,12 +361,14 @@ def delete_conversation(chat_id: str, user_id: Optional[str] = None) -> bool:
     ph = "%s" if is_mysql_configured() else "?"
     with get_db() as conn:
         cursor = conn.cursor()
-        if user_id:
-            convo = get_conversation(chat_id, user_id)
-            if not convo:
-                return False
         cursor.execute(f"DELETE FROM chat_messages WHERE chat_id = {ph}", (chat_id,))
-        cursor.execute(f"DELETE FROM conversations WHERE id = {ph}", (chat_id,))
+        if user_id:
+            cursor.execute(
+                f"DELETE FROM conversations WHERE id = {ph} AND user_id = {ph}",
+                (chat_id, user_id),
+            )
+        else:
+            cursor.execute(f"DELETE FROM conversations WHERE id = {ph}", (chat_id,))
         return cursor.rowcount > 0
 
 

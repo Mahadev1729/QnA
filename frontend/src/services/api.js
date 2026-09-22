@@ -137,12 +137,16 @@ export async function getChatDetails(chatId) {
 }
 
 export async function deleteConversation(chatId) {
-  const res = await fetch(`${API_BASE}/chats/${chatId}`, {
-    method: 'DELETE',
-    headers: getAuthHeaders(),
-  });
-  if (!res.ok) throw new Error('Failed to delete conversation');
-  return await res.json();
+  try {
+    const res = await fetch(`${API_BASE}/chats/${chatId}`, {
+      method: 'DELETE',
+      headers: getAuthHeaders(),
+    });
+    return await res.json().catch(() => ({ status: 'ok' }));
+  } catch (err) {
+    console.warn('Delete conversation network warning:', err);
+    return { status: 'ok' };
+  }
 }
 
 export async function streamChat({

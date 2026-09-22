@@ -43,10 +43,25 @@ export default function ChatHeader({
           <div
             className="header-user-badge"
             onClick={handleLogout}
-            title="Click to Sign Out"
+            title={`${currentUser.username || 'User'} (Click to Sign Out)`}
           >
-            <div className="header-user-avatar">
-              {currentUser.username ? currentUser.username[0].toUpperCase() : 'U'}
+            <div className="header-user-avatar-wrapper">
+              {currentUser.avatar_url ? (
+                <img
+                  src={currentUser.avatar_url}
+                  alt={currentUser.username || 'User'}
+                  className="header-user-avatar-img"
+                  onError={(e) => {
+                    e.currentTarget.style.display = 'none';
+                  }}
+                />
+              ) : null}
+              <div
+                className="header-user-avatar"
+                style={{ display: currentUser.avatar_url ? 'none' : 'flex' }}
+              >
+                {currentUser.username ? currentUser.username[0].toUpperCase() : 'U'}
+              </div>
             </div>
           </div>
         )}

@@ -252,12 +252,12 @@ body {
   border: none;
   color: var(--text-dim);
   cursor: pointer;
-  padding: 3px;
-  border-radius: 4px;
+  padding: 4px;
+  border-radius: var(--radius-sm);
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.15s;
+  transition: all 0.12s ease;
 }
 
 .chat-item:hover .delete-chat-btn {
@@ -266,22 +266,30 @@ body {
 
 .delete-chat-btn:hover {
   color: #f87171;
-  background: rgba(239, 68, 68, 0.15);
+  background: rgba(239, 68, 68, 0.18);
+  transform: scale(1.08);
+}
+
+.delete-chat-btn:active {
+  transform: scale(0.92);
 }
 
 .user-profile-bar {
-  padding: 10px 12px;
+  padding: 8px 10px;
   margin: 6px 8px 8px;
   border-radius: var(--radius-md);
   display: flex;
   align-items: center;
   justify-content: space-between;
-  transition: background 0.15s;
+  transition: all 0.15s ease;
   cursor: pointer;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.04);
 }
 
 .user-profile-bar:hover {
   background: var(--bg-surface-hover);
+  border-color: rgba(255, 255, 255, 0.08);
 }
 
 .user-profile-info {
@@ -292,18 +300,45 @@ body {
   flex: 1;
 }
 
-.user-avatar-initial {
-  width: 30px;
-  height: 30px;
+.user-avatar-wrapper {
+  position: relative;
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+}
+
+.user-avatar-initial,
+.user-avatar-img {
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #10a37f 0%, #ab68ff 100%);
+  object-fit: cover;
+}
+
+.user-avatar-initial {
+  background: linear-gradient(135deg, #10a37f 0%, #38bdf8 100%);
   color: #fff;
   font-size: 13px;
   font-weight: 600;
   display: flex;
   align-items: center;
   justify-content: center;
-  flex-shrink: 0;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+}
+
+.user-avatar-badge-icon {
+  position: absolute;
+  bottom: -2px;
+  right: -2px;
+  width: 15px;
+  height: 15px;
+  background: #ffffff;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.35);
+  padding: 1px;
 }
 
 .user-details {
@@ -311,23 +346,46 @@ body {
   flex-direction: column;
   min-width: 0;
   flex: 1;
+  gap: 2px;
 }
 
 .user-name {
   font-size: 13px;
-  font-weight: 500;
+  font-weight: 600;
   color: var(--text-main);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.2;
+}
+
+.user-status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11.5px;
+  font-weight: 500;
+  color: var(--text-muted);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-.user-email {
-  font-size: 11px;
+.logout-icon-btn {
   color: var(--text-dim);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  opacity: 0.65;
+  transition: all 0.15s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+  border-radius: var(--radius-sm);
+}
+
+.user-profile-bar:hover .logout-icon-btn {
+  opacity: 1;
+  color: #f87171;
+  background: rgba(239, 68, 68, 0.12);
 }
 
 /* ==========================================================================
@@ -401,13 +459,30 @@ body {
   align-items: center;
   cursor: pointer;
   padding: 2px;
+  border-radius: 50%;
+  transition: transform 0.15s ease;
 }
 
-.header-user-avatar {
+.header-user-badge:hover {
+  transform: scale(1.06);
+}
+
+.header-user-avatar-wrapper {
+  position: relative;
+  width: 28px;
+  height: 28px;
+}
+
+.header-user-avatar,
+.header-user-avatar-img {
   width: 28px;
   height: 28px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #10a37f 0%, #3b82f6 100%);
+  object-fit: cover;
+}
+
+.header-user-avatar {
+  background: linear-gradient(135deg, #10a37f 0%, #38bdf8 100%);
   color: #fff;
   font-size: 12px;
   font-weight: 600;

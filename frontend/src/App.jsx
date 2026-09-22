@@ -184,21 +184,42 @@ export default function App() {
   };
 
   const handleDeleteChat = async (e, chatId) => {
-    e.stopPropagation();
+    if (e) {
+      e.stopPropagation();
+      e.preventDefault();
+    }
+
+    // 1. Instantly remove from UI state with zero delay
+    const updated = conversations.filter((c) => c.id !== chatId);
+    setConversations(updated);
+
+    // 2. If deleting the currently active conversation, switch immediately
+    if (activeChatId === chatId) {
+      setIsStreaming(false);
+      setStatusMessage('');
+      setErrorMessage('');
+
+      if (updated.length > 0) {
+        const nextChat = updated[0];
+        setActiveChatId(nextChat.id);
+        getChatDetails(nextChat.id)
+          .then((details) => {
+            setMessages(details.messages || []);
+          })
+          .catch((err) => {
+            console.error('Failed to load next chat after delete:', err);
+            setMessages([]);
+          });
+      } else {
+        startNewChat();
+      }
+    }
+
+    // 3. Asynchronously inform backend without blocking UI or throwing errors
     try {
       await deleteConversation(chatId);
-      const updated = conversations.filter((c) => c.id !== chatId);
-      setConversations(updated);
-
-      if (activeChatId === chatId) {
-        if (updated.length > 0) {
-          selectChat(updated[0].id);
-        } else {
-          startNewChat();
-        }
-      }
     } catch (err) {
-      console.error('Failed to delete chat:', err);
+      console.warn('Background delete conversation sync:', err);
     }
   };
 

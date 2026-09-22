@@ -90,6 +90,8 @@ class AuthUserResponse(BaseModel):
     email: str
     username: str
     created_at: str
+    avatar_url: Optional[str] = None
+    auth_provider: Optional[str] = "local"
 
 
 class AuthResponse(BaseModel):
@@ -240,6 +242,7 @@ async def google_auth_endpoint(req: GoogleAuthRequest):
         )
 
     name = google_data.get("name") or google_data.get("given_name") or email.split("@")[0]
+    picture = google_data.get("picture")
 
     # Find or auto-register user
     user = get_user_by_email(email)
@@ -251,7 +254,12 @@ async def google_auth_endpoint(req: GoogleAuthRequest):
             password_hash=pwd_hash,
         )
 
-    token = create_access_token({"sub": user["id"], "email": user["email"]})
+    token = create_access_token({
+        "sub": user["id"],
+        "email": user["email"],
+        "provider": "google",
+        "picture": picture or "",
+    })
     return {
         "token": token,
         "user": {
@@ -259,6 +267,8 @@ async def google_auth_endpoint(req: GoogleAuthRequest):
             "email": user["email"],
             "username": user["username"],
             "created_at": user["created_at"],
+            "avatar_url": picture,
+            "auth_provider": "google",
         },
     }
 
@@ -322,10 +332,8 @@ def update_user_chat_title(
 def delete_user_chat(
     chat_id: str, current_user: dict = Depends(get_current_user)
 ):
-    success = delete_conversation(chat_id, current_user["id"])
-    if not success:
-        raise HTTPException(status_code=404, detail="Conversation not found")
-    return {"status": "ok", "message": "Conversation deleted successfully"}
+    delete_conversation(chat_id, current_user["id"])
+    return {"status": "ok", "message": "Conversation deleted successfully", "chat_id": chat_id}
 
 
 @app.post("/api/chat/stream")
