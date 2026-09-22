@@ -78,9 +78,12 @@ export default function AuthScreen({
     <div className="auth-wrapper">
       <div className="auth-card">
         <div className="auth-brand">
-          <div className="brand-icon">Q</div>
-          <div className="brand-title" style={{ fontSize: '18px' }}>
-            QuickAnswer AI
+          <div className="brand-logo-badge">
+            <span className="brand-q-letter">Q</span>
+            <div className="brand-q-sparkle">✦</div>
+          </div>
+          <div className="brand-title">
+            QuickAnswer <span className="brand-ai-pill">AI</span>
           </div>
         </div>
         <p className="auth-subtitle">
