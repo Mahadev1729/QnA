@@ -82,9 +82,9 @@ export default function AuthScreen({
             <span className="brand-q-letter">Q</span>
             <div className="brand-q-sparkle">✦</div>
           </div>
-          <div className="brand-title">
+          <h1 className="brand-title" style={{ margin: 0 }}>
             QuickAnswer <span className="brand-ai-pill">AI</span>
-          </div>
+          </h1>
         </div>
         <p className="auth-subtitle">
           {authMode === 'login'
