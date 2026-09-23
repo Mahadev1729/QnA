@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://quickanswer-ai-s2k8.onrender.com/sitemap.xml
